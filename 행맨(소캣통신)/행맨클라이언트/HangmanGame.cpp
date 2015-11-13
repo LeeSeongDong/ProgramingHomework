@@ -145,10 +145,6 @@ bool HangmanGame::isWin()
 		{
 			return true;
 		}
-		else
-		{
-			return false;
-		}
 	}
 	else
 	{

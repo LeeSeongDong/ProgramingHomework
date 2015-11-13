@@ -1,10 +1,9 @@
 #ifndef __HEADER_H__
 #define __HEADER_H__
 
-#include <iostream>
 #include <WinSock2.h>
-#include <thread>
-#include <fstream>
+#include <process.h>
+#include <iostream>
 #include <string>
 #include <ctime>
 

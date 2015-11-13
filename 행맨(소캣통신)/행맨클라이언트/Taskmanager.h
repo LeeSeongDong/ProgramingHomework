@@ -13,7 +13,7 @@ public :
 	~Taskmanager() {};
 
 	void startHangmanGame(HangmanGame &hg, WordList &wordList);
-	char selectMenu(char a, HangmanGame &hg, UserList &userList, WordList &wordList, string userFile);
+	char selectMenu(char a, HangmanGame &hg, UserList &userList, WordList &wordList);
 
 	void loadUser(UserList &userList);
 	User getCurrentUser()
@@ -29,7 +29,7 @@ public :
 	void putRank(UserList &userList);
 	void putPreviousRecord(UserList &userList);
 	void putCurrentRecord();
-	void saveAndQuit(string userFile, UserList &userList);
+	void saveAndQuit(UserList &userList);
 
 };
 

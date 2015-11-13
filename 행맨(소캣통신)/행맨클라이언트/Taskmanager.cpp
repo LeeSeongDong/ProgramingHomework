@@ -85,7 +85,7 @@ void Taskmanager::startHangmanGame(HangmanGame &hg, WordList &wordList)
 	}
 }
 
-char Taskmanager::selectMenu(char a, HangmanGame &hg, UserList &userList, WordList &wordList, string userFile)
+char Taskmanager::selectMenu(char a, HangmanGame &hg, UserList &userList, WordList &wordList)
 {
 	IoHandler ioh;
 
@@ -121,7 +121,7 @@ char Taskmanager::selectMenu(char a, HangmanGame &hg, UserList &userList, WordLi
 	}
 	case 'Q':
 	{
-		saveAndQuit(userFile, userList);
+		saveAndQuit(userList);
 		cin >> b;
 		break;
 	}
@@ -240,7 +240,7 @@ void Taskmanager::putCurrentRecord()
 }
 
 
-void Taskmanager::saveAndQuit(string userFile, UserList &userList)
+void Taskmanager::saveAndQuit(UserList &userList)
 {
 	IoHandler ioh;
 
@@ -296,6 +296,4 @@ void Taskmanager::saveAndQuit(string userFile, UserList &userList)
 
 		userList.insertUser(currentUser);
 	}
-
-	ioh.saveUserFile(userFile, userList);
 }
