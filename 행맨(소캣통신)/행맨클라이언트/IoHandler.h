@@ -17,7 +17,7 @@ public :
 	void printHangman(int count);
 	void printLetter(char a);
 
-	User printUserMenu(UserList &userList);
+	User printUserMenu(UserList &userList, SOCKET& servSock);
 
 	
 	void printRank(UserList &userList);

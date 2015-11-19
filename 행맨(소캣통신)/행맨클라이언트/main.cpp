@@ -1,5 +1,7 @@
 #include "Taskmanager.h"
 
+#pragma warning(disable:4996);
+
 int main()		//argv[1] : 사전파일명, argv[2] : 사용자파일명
 {
 	IoHandler ioh;
@@ -39,20 +41,9 @@ int main()		//argv[1] : 사전파일명, argv[2] : 사용자파일명
 	}
 
 	char buf[255] = { 0 };
-	ioh.putMsg("서버에 접속중...");
+	ioh.putMsg("행맨 서버에 접속중...");
 
-	//---------서버에 접속--------
-	int sendsize = send(servSock, "con", strlen(buf), 0);
-
-	//---------서버로부터 유저정보, 단어정보 수신-----------
-	int recvsize = recv(servSock, buf, sizeof(buf), 0);
-
-	//유저정보, 단어정보 받아서 userList, wordList에 넣자
-	//소켓으로 객체는 어떻게 받을까?
-
-	///////////////////////////////////////////////////
-
-	tm.loadUser(userList);
+	tm.loadUser(userList, servSock);
 
 	while (true)
 	{
@@ -62,10 +53,12 @@ int main()		//argv[1] : 사전파일명, argv[2] : 사용자파일명
 
 		if (menu == 'Q' || menu == 'Z')
 		{
+			send(servSock, &menu, 1, 0);
 			break;
 		}
 	}
 
+	///////////////////////////////////////////////////
 	//----------소켓 닫음------------------
 	closesocket(servSock);
 

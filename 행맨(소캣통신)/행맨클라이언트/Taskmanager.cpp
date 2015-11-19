@@ -85,11 +85,9 @@ void Taskmanager::startHangmanGame(HangmanGame &hg, WordList &wordList)
 	}
 }
 
-char Taskmanager::selectMenu(char a, HangmanGame &hg, UserList &userList, WordList &wordList)
+char Taskmanager::selectMenu(char a, HangmanGame &hg, UserList &userList, WordList &wordList, SOCKET& servSock)
 {
 	IoHandler ioh;
-
-	char b;
 
 	if (a >= LOWER_A)
 	{
@@ -101,52 +99,56 @@ char Taskmanager::selectMenu(char a, HangmanGame &hg, UserList &userList, WordLi
 
 	case 'S':
 	{
+		send(servSock, "S", 1, 0);
 		startHangmanGame(hg,wordList);
 		break;
 	}
 	case 'I':
 	{
+		send(servSock, "I", 1, 0);
 		putCurrentRecord();
 		break;
 	}
 	case 'H':
 	{
+		send(servSock, "H", 1, 0);
+		send(servSock, currentUser.getName().c_str(), currentUser.getName().size(), 0);
 		putPreviousRecord(userList);
 		break;
 	}
 	case 'R':
 	{
+		send(servSock, "R", 1, 0);
 		putRank(userList);
 		break;
 	}
 	case 'Q':
 	{
+		send(servSock, "Q", 1, 0);
 		saveAndQuit(userList);
-		cin >> b;
 		break;
 	}
 	case 'Z':
 	{
+		send(servSock, "Z", 1, 0);
 		break;
 	}
 
 	default:
 	{
 		ioh.putMsg("[S/I/H/R/Q/Z] 중에서 입력하세요. ");
-		cin >> b;
 		break;
 	}
 	}
 
 	return a;
-
 }
 
-void Taskmanager::loadUser(UserList &userList)
+void Taskmanager::loadUser(UserList &userList, SOCKET& servSock)
 {
 	IoHandler ioh;
 
-	currentUser = ioh.printUserMenu(userList);
+	currentUser = ioh.printUserMenu(userList, servSock);
 }
 
 string Taskmanager::upperToLower(string word)

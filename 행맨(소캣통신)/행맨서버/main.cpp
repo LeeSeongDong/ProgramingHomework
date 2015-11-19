@@ -1,20 +1,39 @@
-#include "IoHandler.h"
+#include "Taskmanager.h"
 
 void startHangman(void* p, UserList &userList, WordList &wordList)
 {
 	SOCKET sock = (SOCKET)p;
-	char buf[256];
+	char buf[255];
 
 	while (true)
 	{
 		//-----------유저이름 수신------------
-		int recvsize = recv(sock, buf, sizeof(buf), 0);
-		buf[recvsize] = '\0';
-
+		recv(sock, buf, sizeof(buf), 0);
+	
 		string userName = buf;
+		if(userList.isUserExist(userName))
+		{
+			send(sock, "T", 1, 0);
+		}
+		else
+		{
+			send(sock, "F", 1, 0);
+			break;
+		}
 
-		//----------클라이언트에게 전송------------------
-		int sendsize = send(sock, buf, strlen(buf), 0);
+		recv(sock, buf, sizeof(buf), 0);
+
+		if (buf[0] == 'L')
+		{
+			User user = userList.getUserByName(userName);
+			send(sock, user.getName().c_str(), user.getName().size(), 0);
+			itoa(user.getWinCount(), buf, 10);
+			send(sock, buf, sizeof(buf), 0);
+			itoa(user.getLoseCount(), buf, 10);
+			send(sock, buf, sizeof(buf), 0);
+			
+			break;
+		}
 	}
 
 	//-----------소켓 닫기---------------
@@ -25,6 +44,7 @@ int main()
 {
 	IoHandler ioh;
 
+	Taskmanager tm;
 	WordList wordList;
 	UserList userList;
 
@@ -56,7 +76,7 @@ int main()
 	bind(servSock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR));
 	
 	/*
-	if(bind(servSock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR)))
+	if(bind(servSock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR)) 0)
 	{
 		cout << "bind() Error\n" << endl;
 		return 0;
@@ -64,7 +84,7 @@ int main()
 	*/
 
 	//listen 소캣이 클라이언트의 연결요청을 받아들일수 있는 상태가 되게함
-	listen(servSock, 5);		// 5명까지만 대기할 수 있게 함
+	listen(servSock, 10);		// 10명까지만 대기할 수 있게 함
 
 	SOCKADDR_IN clntAddr = { 0 };
 	int size = sizeof(SOCKADDR_IN);
@@ -80,7 +100,7 @@ int main()
 		}
 		cout << "클라이언트 접속\n" << endl;
 		//-----------수신 스레드 생성-------------
-		thread t(&startHangman, clntSock, userList, wordList);
+		thread t(&tm.startServer, clntSock, userList, wordList);
 	}
 
 	//----------소켓 닫음---------------

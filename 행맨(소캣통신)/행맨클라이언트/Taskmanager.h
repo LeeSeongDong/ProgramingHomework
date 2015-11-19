@@ -13,9 +13,9 @@ public :
 	~Taskmanager() {};
 
 	void startHangmanGame(HangmanGame &hg, WordList &wordList);
-	char selectMenu(char a, HangmanGame &hg, UserList &userList, WordList &wordList);
+	char selectMenu(char a, HangmanGame &hg, UserList &userList, WordList &wordList, SOCKET& servSock);
 
-	void loadUser(UserList &userList);
+	void loadUser(UserList &userList, SOCKET& servSock);
 	User getCurrentUser()
 	{
 		return currentUser;
