@@ -22,6 +22,10 @@ public :
 	char selectMenu(char a, HangmanGame &hg, SOCKET& servSock);
 
 	void loadUser(SOCKET& servSock);
+	void setCurrentUser(User& user)
+	{
+		currentUser = user;
+	}
 	User getCurrentUser()
 	{
 		return currentUser;

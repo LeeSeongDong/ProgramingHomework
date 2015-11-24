@@ -6,7 +6,7 @@ void Taskmanager::startHangmanGame(HangmanGame &hg, SOCKET& servSock)
 	char a;
 
 	string word, partOfSpeech, meaning;
-	char buf[255];
+	char buf[255] = { 0 };
 
 	recv(servSock, buf, sizeof(buf), 0);
 	word = buf;
@@ -98,7 +98,7 @@ void Taskmanager::startHangmanGame(HangmanGame &hg, SOCKET& servSock)
 char Taskmanager::selectMenu(char a, HangmanGame &hg, SOCKET& servSock)
 {
 	IoHandler ioh;
-	char buf[10];
+	char buf[255] = { 0 };
 
 	if (a >= LOWER_A)
 	{
@@ -135,7 +135,6 @@ char Taskmanager::selectMenu(char a, HangmanGame &hg, SOCKET& servSock)
 	case 'Q':
 	{//저장후 종료
 		send(servSock, "Q", 1, 0);
-		recv(servSock, buf, sizeof(buf), 0);
 		saveAndQuit(servSock);
 		break;
 	}
@@ -251,7 +250,7 @@ void Taskmanager::putCurrentRecord()
 void Taskmanager::saveAndQuit(SOCKET& servSock)
 {
 	IoHandler ioh;
-	char buf[255];
+	char buf[255] = { 0 };
 
 	cout << endl;
 
@@ -284,5 +283,4 @@ void Taskmanager::saveAndQuit(SOCKET& servSock)
 
 	itoa(currentUser.getLoseCount(), buf, 10);
 	send(servSock, buf, sizeof(buf), 0);
-	recv(servSock, buf, sizeof(buf), 0);
 }

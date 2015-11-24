@@ -1,14 +1,13 @@
 #include "Taskmanager.h"
 #pragma warning(disable:4996)
 
-void Taskmanager::startServer(void* p, UserList &userList, WordList &wordList)
+void Taskmanager::startServer(SOCKET& sock, UserList &userList, WordList &wordList)
 {
-	SOCKET sock = (SOCKET)p;
 	IoHandler ioh;
 
 	sendUserInfo(userList, sock);
 
-	char buf[255];
+	char buf[255] = { 0 };
 
 	while (true)
 	{
@@ -37,6 +36,7 @@ void Taskmanager::startServer(void* p, UserList &userList, WordList &wordList)
 		case 'R':
 		{
 			sendRankInfo(userList, sock);
+			break;
 		}
 		//저장후종료
 		case 'Q':
@@ -59,13 +59,11 @@ void Taskmanager::startServer(void* p, UserList &userList, WordList &wordList)
 			break;
 		}
 	}
-	//-----------소켓 닫기---------------
-	closesocket(sock);
 }
 
 void Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 {
-	char buf[255];
+	char buf[255] = { 0 };
 
 	while (true)
 	{
@@ -89,13 +87,13 @@ void Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 		{
 			User user = userList.getUserByName(userName);
 			send(clntSock, user.getName().c_str(), user.getName().size(), 0);
+
+			recv(clntSock, buf, sizeof(buf), 0);
 			itoa(user.getWinCount(), buf, 10);
-			recv(clntSock, buf, sizeof(buf), 0);
-
 			send(clntSock, buf, sizeof(buf), 0);
-			itoa(user.getLoseCount(), buf, 10);
+			
 			recv(clntSock, buf, sizeof(buf), 0);
-
+			itoa(user.getLoseCount(), buf, 10);
 			send(clntSock, buf, sizeof(buf), 0);
 
 			break;
@@ -105,12 +103,11 @@ void Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 
 void Taskmanager::sendRankInfo(UserList& userList, SOCKET& clntSock)
 {
-	char buf[255];
+	char buf[255] = { 0 };
 	int numOfUser = userList.getSize();
 	itoa(numOfUser, buf, 10);
 
 	send(clntSock, buf, sizeof(buf), 0);
-	recv(clntSock, buf, sizeof(buf), 0);
 
 	int sameRank = 0;
 
@@ -129,6 +126,7 @@ void Taskmanager::sendRankInfo(UserList& userList, SOCKET& clntSock)
 				sameRank = 0;
 			}
 		}
+		recv(clntSock, buf, sizeof(buf), 0);
 		itoa(i + 1 - sameRank, buf, 10);
 		send(clntSock, buf, sizeof(buf), 0);
 
@@ -148,14 +146,14 @@ void Taskmanager::sendRankInfo(UserList& userList, SOCKET& clntSock)
 		string winningRate = to_string(user.getWinningRate());
 		send(clntSock, winningRate.c_str(), winningRate.size(), 0);
 	}
-
 }
 
 void Taskmanager::sendGameInfo(WordList& wordList, SOCKET& clntSock)
 {
-	srand((unsigned)ctime(NULL));
-	Word word = wordList.getWordByIndex(rand());
-	char buf[255];
+	srand((unsigned int)time(NULL));
+	int numOfWord = wordList.getWordListSize();
+	Word word = wordList.getWordByIndex(rand()%numOfWord);
+	char buf[255] = { 0 };
 
 	send(clntSock, word.getWordName().c_str(), word.getWordName().size(), 0);
 	recv(clntSock, buf, sizeof(buf), 0);
@@ -163,12 +161,12 @@ void Taskmanager::sendGameInfo(WordList& wordList, SOCKET& clntSock)
 	send(clntSock, word.getPartOfSpeech().c_str(), word.getPartOfSpeech().size(), 0);
 	recv(clntSock, buf, sizeof(buf), 0);
 
-	send(clntSock, word.getWordName().c_str(), word.getMeaning().size(), 0);
+	send(clntSock, word.getMeaning().c_str(), word.getMeaning().size(), 0);
 }
 
 void Taskmanager::saveAndQuit(UserList& userList, SOCKET& clntSock)
 {
-	char buf[255];
+	char buf[255] = { 0 };
 	string name;
 	int win, lose;
 

@@ -11,7 +11,7 @@ public :
 	Taskmanager() {};
 	~Taskmanager() {};
 
-	void startServer(void* p, UserList &userList, WordList &wordList);
+	void startServer(SOCKET& sock, UserList &userList, WordList &wordList);
 	void sendUserInfo(UserList& userList, SOCKET& clntSock);
 	void sendRankInfo(UserList& userList, SOCKET& clntSock);
 	void sendGameInfo(WordList& wordList, SOCKET& clntSock);

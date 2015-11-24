@@ -22,10 +22,13 @@ int main()		//argv[1] : 사전파일명, argv[2] : 사용자파일명
 	SOCKET servSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	//TCP를 이용한 소켓
 
 	//---------서버 정보 입력--------------------
+	string ip = ioh.inputStr("서버의 IP주소를 입력하세요 : ");
+	int port = ioh.inputNum("서버의 포트번호를 입력하세요 : ");
+
 	SOCKADDR_IN servAddr;
 	servAddr.sin_family = AF_INET;						// IP주소를 이용하고
-	servAddr.sin_port = htons(4000);					// 소켓은 4000번에
-	servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");	// 서버의 ip 주소는 127.0.0.1
+	servAddr.sin_port = htons(port);					// 소켓은 4000번에
+	servAddr.sin_addr.s_addr = inet_addr(ip.c_str());	// 서버의 ip 주소는 127.0.0.1
 
 	//---------서버 연결------------
 	retval = connect(servSock, (SOCKADDR*)&servAddr, sizeof(SOCKADDR));
@@ -35,10 +38,11 @@ int main()		//argv[1] : 사전파일명, argv[2] : 사용자파일명
 		return 0;
 	}
 
-	char buf[255];
 	ioh.putMsg("행맨 서버에 접속중...");
 
-	ioh.printUserMenu(servSock);
+	User currentUser = ioh.printUserMenu(servSock);
+
+	tm.setCurrentUser(currentUser);
 
 	while (true)
 	{
@@ -48,7 +52,7 @@ int main()		//argv[1] : 사전파일명, argv[2] : 사용자파일명
 
 		if (menu == 'Q' || menu == 'Z')
 		{
-			send(servSock, &menu, 1, 0);
+			recv(servSock, &menu, 1, 0);
 			break;
 		}
 	}

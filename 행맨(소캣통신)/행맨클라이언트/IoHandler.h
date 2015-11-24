@@ -9,9 +9,10 @@ public :
 	IoHandler() {}
 	~IoHandler() {}
 
-	string inputName(string msg);
+	string inputStr(string msg);
 	char inputMenu(User user);
 	string inputLetter(string msg);
+	int inputNum(string msg);
 
 	void printHangman(int count);
 	void printLetter(char a);

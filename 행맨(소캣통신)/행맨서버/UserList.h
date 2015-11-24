@@ -19,7 +19,7 @@ public :
 		userList = new User[capacity];
 	};
 	~UserList()
-	{ 
+	{
 		delete[]userList;
 	};
 
@@ -38,6 +38,10 @@ public :
 	bool isUserExist(string userName);
 	void insertUser(User& user);
 	void updateUser(User& user);
+	void deleteUserList()
+	{
+		size = 0;
+	}
 
 };
 

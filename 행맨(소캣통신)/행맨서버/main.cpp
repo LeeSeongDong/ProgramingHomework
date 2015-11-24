@@ -1,29 +1,29 @@
 #include "Taskmanager.h"
 
-void startServer(SOCKET& sock, Taskmanager& tm, UserList& userList, WordList& wordList)
+WordList wordList;
+UserList userList;
+
+unsigned WINAPI startServ(void* p)
 {
-	//SOCKET sock = (SOCKET)p;
-	char buf[10] = { 0 };
-	recv(sock, buf, sizeof(buf), 0);
-	cout << buf;
+	SOCKET sock = (SOCKET)p;
+	Taskmanager tm;
 
-	//tm.startServer(p, userList, wordList);
+	char buf[255] = { 0 };
+	tm.startServer(sock, userList, wordList);
+
+	//-----------소켓 닫기---------------
+	closesocket(sock);
+
+	return 0;
 }
-
 
 int main()
 {
 	IoHandler ioh;
 
-	Taskmanager tm;
-	WordList wordList;
-	UserList userList;
-
 	//사전, 유저정보 로드
-	ioh.loadWordFile("DICT.txt"/*argv[1]*/, wordList);
-	ioh.loadUserFile("GAME_RECORD.txt"/*argv[2]*/, userList);
-	userList.setUserWinningRate();
-	userList.sortByWinningRate();
+	ioh.loadWordFile("DICT.txt", wordList);
+
 
 	//-------소켓 라이브러리 불러오기(?)--------
 	WSADATA wsaData;
@@ -69,20 +69,27 @@ int main()
 
 	cout << "서버가동" << endl;
 
+
 	while (true)
 	{
 		//-------------클라이언트 접속 대기, connect를 하면 리턴함-------------
-		SOCKET clntSock = new SOCKET();
-		//SOCKET clntSock = accept(servSock, (SOCKADDR*)&clnt_addr, &size);
-		if (clntSock == SOCKET_ERROR)
+		SOCKET sock = accept(servSock, (SOCKADDR*)&clnt_addr, &size);	
+		if (sock == SOCKET_ERROR)
 		{
 			printf("accept() Error\n");
 			continue;
 		}
 
 		cout << "클라이언트 접속\n" << endl;
+
+		//-----------유저정보 최신화--------------
+		userList.deleteUserList();
+		ioh.loadUserFile("GAME_RECORD.txt", userList);
+		userList.setUserWinningRate();
+		userList.sortByWinningRate();
+
 		//-----------수신 스레드 생성-------------
-		std::thread t(&startServer, clntSock, tm, userList, wordList);
+		_beginthreadex(NULL, 0, startServ, (void*)sock, 0, NULL);
 	}
 
 	//----------소켓 닫음---------------
