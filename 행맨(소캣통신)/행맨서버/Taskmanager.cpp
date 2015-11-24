@@ -4,8 +4,7 @@
 void Taskmanager::startServer(SOCKET& sock, UserList &userList, WordList &wordList)
 {
 	IoHandler ioh;
-
-	sendUserInfo(userList, sock);
+	string userName = sendUserInfo(userList, sock);
 
 	char buf[255] = { 0 };
 
@@ -59,18 +58,21 @@ void Taskmanager::startServer(SOCKET& sock, UserList &userList, WordList &wordLi
 			break;
 		}
 	}
+
+	userList.getUserByName(userName).logout();
 }
 
-void Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
+string Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 {
 	char buf[255] = { 0 };
+	string userName;
 
 	while (true)
 	{
 		//-----------유저이름 수신------------
 		recv(clntSock, buf, sizeof(buf), 0);
+		userName = buf;
 
-		string userName = buf;
 		if (userList.isUserExist(userName))
 		{
 			send(clntSock, "T", 1, 0);
@@ -78,6 +80,11 @@ void Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 		else
 		{
 			send(clntSock, "F", 1, 0);
+
+			User newUser(userName, 0, 0);
+			newUser.login();
+			newUser.setWinningRate();
+			userList.insertUser(newUser);
 			break;
 		}
 
@@ -85,6 +92,20 @@ void Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 
 		if (buf[0] == 'L')
 		{
+			if (userList.getUserByName(userName).isLogin())
+			{
+				send(clntSock, "N", 1, 0);
+				continue;
+			}
+			else
+			{
+				send(clntSock, "T", 1, 0);
+			}
+
+			recv(clntSock, buf, sizeof(buf), 0);
+
+			userList.getUserByName(userName).login();
+
 			User user = userList.getUserByName(userName);
 			send(clntSock, user.getName().c_str(), user.getName().size(), 0);
 
@@ -99,10 +120,15 @@ void Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 			break;
 		}
 	}
+
+	return userName;
 }
 
 void Taskmanager::sendRankInfo(UserList& userList, SOCKET& clntSock)
 {
+	userList.setUserWinningRate();
+	userList.sortByWinningRate();
+
 	char buf[255] = { 0 };
 	int numOfUser = userList.getSize();
 	itoa(numOfUser, buf, 10);

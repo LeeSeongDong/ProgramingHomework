@@ -152,6 +152,20 @@ User IoHandler::printUserMenu(SOCKET& servSock)
 				send(servSock, "L", 1, 0);	//불러오기요청
 
 				recv(servSock, buf, sizeof(buf), 0);
+
+				if (buf[0] == 'N')
+				{
+					cout << "이미 게임중인 사용자입니다." << endl;
+
+					cin >> a;
+					continue;
+				}
+				else
+				{
+					send(servSock, "next", 4, 0);
+				}
+
+				recv(servSock, buf, sizeof(buf), 0);
 				string name = buf;
 				send(servSock, "next", 4, 0);
 

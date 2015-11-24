@@ -10,10 +10,12 @@ void User::setWinningRate()
 	if ( (win + lose) == 0 || win == 0)
 	{
 		winningRate = 0;
+		return;
 	}
 	else if (lose == 0)
 	{
 		winningRate = 100;
+		return;
 	}
 
 	winningRate = win / (win + lose);

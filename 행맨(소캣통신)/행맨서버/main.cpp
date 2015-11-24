@@ -21,8 +21,11 @@ int main()
 {
 	IoHandler ioh;
 
+	//-----------유저정보 최신화--------------
 	//사전, 유저정보 로드
 	ioh.loadWordFile("DICT.txt", wordList);
+	userList.deleteUserList();
+	ioh.loadUserFile("GAME_RECORD.txt", userList);
 
 
 	//-------소켓 라이브러리 불러오기(?)--------
@@ -81,12 +84,6 @@ int main()
 		}
 
 		cout << "클라이언트 접속\n" << endl;
-
-		//-----------유저정보 최신화--------------
-		userList.deleteUserList();
-		ioh.loadUserFile("GAME_RECORD.txt", userList);
-		userList.setUserWinningRate();
-		userList.sortByWinningRate();
 
 		//-----------수신 스레드 생성-------------
 		_beginthreadex(NULL, 0, startServ, (void*)sock, 0, NULL);

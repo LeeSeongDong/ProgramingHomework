@@ -12,7 +12,7 @@ public :
 	~Taskmanager() {};
 
 	void startServer(SOCKET& sock, UserList &userList, WordList &wordList);
-	void sendUserInfo(UserList& userList, SOCKET& clntSock);
+	string sendUserInfo(UserList& userList, SOCKET& clntSock);
 	void sendRankInfo(UserList& userList, SOCKET& clntSock);
 	void sendGameInfo(WordList& wordList, SOCKET& clntSock);
 	void saveAndQuit(UserList& userList, SOCKET& clntSock);

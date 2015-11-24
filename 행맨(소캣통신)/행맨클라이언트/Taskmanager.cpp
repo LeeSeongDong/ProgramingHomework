@@ -250,6 +250,7 @@ void Taskmanager::putCurrentRecord()
 void Taskmanager::saveAndQuit(SOCKET& servSock)
 {
 	IoHandler ioh;
+	char a;
 	char buf[255] = { 0 };
 
 	cout << endl;
@@ -283,4 +284,6 @@ void Taskmanager::saveAndQuit(SOCKET& servSock)
 
 	itoa(currentUser.getLoseCount(), buf, 10);
 	send(servSock, buf, sizeof(buf), 0);
+
+	cin >> a;
 }
