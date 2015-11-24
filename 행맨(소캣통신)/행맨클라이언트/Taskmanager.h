@@ -7,18 +7,32 @@ class Taskmanager
 {
 private :
 	User currentUser;
+	int win;
+	int lose;
 
 public :
-	Taskmanager() {};
+	Taskmanager()
+	{
+		win = 0;
+		lose = 0;
+	};
 	~Taskmanager() {};
 
-	void startHangmanGame(HangmanGame &hg, WordList &wordList);
-	char selectMenu(char a, HangmanGame &hg, UserList &userList, WordList &wordList, SOCKET& servSock);
+	void startHangmanGame(HangmanGame &hg, SOCKET& servSock);
+	char selectMenu(char a, HangmanGame &hg, SOCKET& servSock);
 
-	void loadUser(UserList &userList, SOCKET& servSock);
+	void loadUser(SOCKET& servSock);
 	User getCurrentUser()
 	{
 		return currentUser;
+	}
+	int getCurrentWin()
+	{
+		return win;
+	}
+	int getCurrentLose()
+	{
+		return lose;
 	}
 
 	string upperToLower(string word);
@@ -26,10 +40,10 @@ public :
 
 	void currentUserScore(bool isWin);
 
-	void putRank(UserList &userList);
-	void putPreviousRecord(UserList &userList);
+	void putRank(SOCKET& servSock);
+	void putPreviousRecord();
 	void putCurrentRecord();
-	void saveAndQuit(UserList &userList);
+	void saveAndQuit(SOCKET& servSock);
 
 };
 

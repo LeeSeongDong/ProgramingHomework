@@ -1,6 +1,6 @@
 #include "WordList.h"
 
-void WordList::insertWord(Word word)
+void WordList::insertWord(Word& word)
 {
 
 	if (size == capacity)

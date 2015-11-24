@@ -10,7 +10,6 @@ string IoHandler::inputName(string msg)
 	return name;
 }
 
-
 char IoHandler::inputMenu(User user)
 {
 	char menu;
@@ -26,7 +25,6 @@ char IoHandler::inputMenu(User user)
 	return menu;
 }
 
-
 string IoHandler::inputLetter(string msg)
 {
 	string letter;
@@ -37,7 +35,6 @@ string IoHandler::inputLetter(string msg)
 
 	return letter;
 }
-
 
 void IoHandler::printHangman(int count)
 {
@@ -101,14 +98,12 @@ void IoHandler::printHangman(int count)
 	cout << "___" << endl;
 }
 
-
 void IoHandler::printLetter(char a)
 {
 	cout << a;
 }
 
-
-User IoHandler::printUserMenu(UserList &userList, SOCKET& servSock)
+User IoHandler::printUserMenu(SOCKET& servSock)
 {
 	User currentUser;
 	string userName;
@@ -147,9 +142,13 @@ User IoHandler::printUserMenu(UserList &userList, SOCKET& servSock)
 
 				recv(servSock, buf, sizeof(buf), 0);
 				string name = buf;
+				send(servSock, "next", 4, 0);
+
 				recv(servSock, buf, sizeof(buf), 0);
 				string strWin = buf;
 				int win = atoi(strWin.c_str());
+				send(servSock, "next", 4, 0);
+
 				recv(servSock, buf, sizeof(buf), 0);
 				string strLose = buf;
 				int lose = atoi(strWin.c_str());
@@ -192,45 +191,61 @@ User IoHandler::printUserMenu(UserList &userList, SOCKET& servSock)
 	return currentUser;
 }
 
-	
-void IoHandler::printRank(UserList &userList)
+void IoHandler::printRank(SOCKET& servSock)
 {
-	int sameRank = 0;
 	char a;
+	char buf[255];
 
-	for (int i = 0; i < userList.getSize(); ++i)
+	int rank;
+	string name;
+	int win;
+	int lose;
+	string winningRate;
+
+	recv(servSock, buf, sizeof(buf), 0);
+	int numOfUser = atoi(buf);
+	send(servSock, "next", 4, 0);
+
+	for (int i = 0; i < numOfUser; ++i)
 	{
-		if (i != 0)
-		{
-			if (userList.getUserByIndex(i - 1).getWinningRate() == userList.getUserByIndex(i).getWinningRate())
-			{
-				sameRank += 1;
-			}
-			else
-			{
-				sameRank = 0;
-			}
-		}
-		cout << i + 1 - sameRank << "등 : " << userList.getUserByIndex(i).getName();
-		cout << "( " << userList.getUserByIndex(i).getWinCount() + userList.getUserByIndex(i).getLoseCount() << "전 ";
-		cout << userList.getUserByIndex(i).getWinCount() << "승. ";
-		cout << "승률 " << userList.getUserByIndex(i).getWinningRate() << "% )";
-		cout << endl << endl;
+		recv(servSock, buf, sizeof(buf), 0);
+		rank = atoi(buf);
+		send(servSock, "next", 4, 0);
 
+		recv(servSock, buf, sizeof(buf), 0);
+		name = buf;
+		send(servSock, "next", 4, 0);
+
+		recv(servSock, buf, sizeof(buf), 0);
+		win = atoi(buf);
+		send(servSock, "next", 4, 0);
+
+		recv(servSock, buf, sizeof(buf), 0);
+		lose = atoi(buf);
+		send(servSock, "next", 4, 0);
+
+		recv(servSock, buf, sizeof(buf), 0);
+		winningRate = buf;
+
+		cout << rank << "등 : " << name;
+		cout << "( " << win + lose << "전 ";
+		cout << win << "승. ";
+		cout << "승률 " << winningRate << "% )";
+		cout << endl << endl;
 	}
 
 	cin >> a;
 }
 
 
-void IoHandler::printPreviousRecord(UserList &userList, User currentUser)
+void IoHandler::printPreviousRecord(User& currentUser)
 {
-	if (userList.isUserExist(currentUser.getName()) == true)
+	if (currentUser.getLoseCount() != 0 && currentUser.getWinCount() != 0)
 	{
 		cout << "이전 게임 기록은 ";
-		cout << userList.getUserByName(currentUser.getName()).getWinCount() + userList.getUserByName(currentUser.getName()).getLoseCount() << "전 ";
-		cout << userList.getUserByName(currentUser.getName()).getWinCount() << "승 ";
-		cout << userList.getUserByName(currentUser.getName()).getLoseCount() << "패입니다." << endl;
+		cout << currentUser.getWinCount() + currentUser.getLoseCount() << "전 ";
+		cout << currentUser.getWinCount() << "승 ";
+		cout << currentUser.getLoseCount() << "패입니다." << endl;
 	}
 
 	else
@@ -242,39 +257,36 @@ void IoHandler::printPreviousRecord(UserList &userList, User currentUser)
 	cin >> a;
 }
 
-
-void IoHandler::printCurrentRecord(User currentUser)
+void IoHandler::printCurrentRecord(int win, int lose)
 {
 	cout << "이번 게임 기록은 ";
-	cout << currentUser.getWinCount() + currentUser.getLoseCount() << "전 ";
-	cout << currentUser.getWinCount() << "승 ";
-	cout << currentUser.getLoseCount() << "패입니다." << endl;
+	cout << win + lose << "전 ";
+	cout << win << "승 ";
+	cout << lose << "패입니다." << endl;
 
 	char a;
 	cin >> a;
 }
 
-
-void IoHandler::printGameHeader(User currentUser)
+void IoHandler::printGameHeader(User& currentUser, int win, int lose)
 {
 	system("cls");
 
 	cout << "====================================================" << endl;
 	cout << "   " << currentUser.getName() << "의 ";
 	cout << currentUser.getWinCount() + currentUser.getLoseCount() + 1;
-	cout << "번째 게임이 수행중에 있습니다. (이번 게임 " << currentUser.getWinCount() << "승 ";
-	cout << currentUser.getLoseCount() << "패)" << endl;
+	cout << "번째 게임이 수행중에 있습니다. (이번 게임 " << win << "승 ";
+	cout << lose << "패)" << endl;
 	cout << "====================================================" << endl;
 }
 
-
-void IoHandler::printMenuHeader(User currentUser)
+void IoHandler::printMenuHeader(User& currentUser, int win, int lose)
 {
 	system("cls");
 
 	cout << "====================================================" << endl;
 	cout << "   " << currentUser.getName();
-	cout << "이 행맨 게임을 수행하고 있습니다. (이번 게임 " << currentUser.getWinCount() << "승 ";
-	cout << currentUser.getLoseCount() << "패)" << endl;
+	cout << "이 행맨 게임을 수행하고 있습니다. (이번 게임 " << win << "승 ";
+	cout << lose << "패)" << endl;
 	cout << "====================================================" << endl;
 }

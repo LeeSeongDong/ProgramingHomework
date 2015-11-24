@@ -3,6 +3,8 @@
 
 #include "Word.h"
 
+#include <ctime>
+
 class WordList
 {
 private : 
@@ -32,7 +34,7 @@ public :
 	{
 		return size;
 	}
-	void insertWord(Word word);
+	void insertWord(Word& word);
 
 	void deleteWordList()
 	{

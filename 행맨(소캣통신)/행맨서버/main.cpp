@@ -1,44 +1,15 @@
 #include "Taskmanager.h"
 
-void startHangman(void* p, UserList &userList, WordList &wordList)
+void startServer(SOCKET& sock, Taskmanager& tm, UserList& userList, WordList& wordList)
 {
-	SOCKET sock = (SOCKET)p;
-	char buf[255];
+	//SOCKET sock = (SOCKET)p;
+	char buf[10] = { 0 };
+	recv(sock, buf, sizeof(buf), 0);
+	cout << buf;
 
-	while (true)
-	{
-		//-----------유저이름 수신------------
-		recv(sock, buf, sizeof(buf), 0);
-	
-		string userName = buf;
-		if(userList.isUserExist(userName))
-		{
-			send(sock, "T", 1, 0);
-		}
-		else
-		{
-			send(sock, "F", 1, 0);
-			break;
-		}
-
-		recv(sock, buf, sizeof(buf), 0);
-
-		if (buf[0] == 'L')
-		{
-			User user = userList.getUserByName(userName);
-			send(sock, user.getName().c_str(), user.getName().size(), 0);
-			itoa(user.getWinCount(), buf, 10);
-			send(sock, buf, sizeof(buf), 0);
-			itoa(user.getLoseCount(), buf, 10);
-			send(sock, buf, sizeof(buf), 0);
-			
-			break;
-		}
-	}
-
-	//-----------소켓 닫기---------------
-	closesocket(sock);
+	//tm.startServer(p, userList, wordList);
 }
+
 
 int main()
 {
@@ -54,53 +25,64 @@ int main()
 	userList.setUserWinningRate();
 	userList.sortByWinningRate();
 
+	//-------소켓 라이브러리 불러오기(?)--------
 	WSADATA wsaData;
-	SOCKADDR_IN servAddr, clntADDR;
-
-	int szClntAddr;
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+	int retval = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (retval != 0)
 	{
-		cout << "WSAStartup() error!" << endl;
+		printf("WSAStartup() Error\n");
+		return 0;
 	}
+	//-------------------------------------------
 
-	//서버
-	//socket(생성)
-	SOCKET servSock = socket(AF_INET, SOCK_STREAM, 0);
+	//----------소켓 생성--------------
+	SOCKET servSock;
+	servSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (servSock == SOCKET_ERROR)
+	{
+		printf("socket() Error\n");
+		return 0;
+	}
+	//-----------------------------------
 
+	//--------서버(자신)의 소켓 정보 입력------------
 	SOCKADDR_IN serv_addr = { 0 };					// 초기화
 	serv_addr.sin_family = AF_INET;					// IP 사용
 	serv_addr.sin_port = htons(4000);				// 포트 4000번
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);	// 주소는 알아서 찾기
+	//------------------------------------------------
 
-	//bind(ip, port번호 할당)
-	bind(servSock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR));
-	
-	/*
-	if(bind(servSock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR)) 0)
+	//-----------인터넷에 연결---------------------
+	retval = ::bind(servSock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR));
+	if (retval == SOCKET_ERROR)
 	{
-		cout << "bind() Error\n" << endl;
+		printf("bind() Error\n");
 		return 0;
 	}
-	*/
+	//--------------------------------------------
 
-	//listen 소캣이 클라이언트의 연결요청을 받아들일수 있는 상태가 되게함
-	listen(servSock, 10);		// 10명까지만 대기할 수 있게 함
-
-	SOCKADDR_IN clntAddr = { 0 };
+	//-----------대기인원 설정-----------------
+	listen(servSock, 5);		// 5명까지만 대기할 수 있게 함...
+	//-------------------------------------------
+	SOCKADDR_IN clnt_addr = { 0 };
 	int size = sizeof(SOCKADDR_IN);
 
-	//accept(클라이언트의 연결요청을 수락함)
+	cout << "서버가동" << endl;
+
 	while (true)
 	{
-		SOCKET clntSock = accept(servSock, (SOCKADDR*)&clntAddr, &size);
+		//-------------클라이언트 접속 대기, connect를 하면 리턴함-------------
+		SOCKET clntSock = new SOCKET();
+		//SOCKET clntSock = accept(servSock, (SOCKADDR*)&clnt_addr, &size);
 		if (clntSock == SOCKET_ERROR)
 		{
-			cout << "accept() Error\n" << endl;
+			printf("accept() Error\n");
 			continue;
 		}
+
 		cout << "클라이언트 접속\n" << endl;
 		//-----------수신 스레드 생성-------------
-		thread t(&tm.startServer, clntSock, userList, wordList);
+		std::thread t(&startServer, clntSock, tm, userList, wordList);
 	}
 
 	//----------소켓 닫음---------------

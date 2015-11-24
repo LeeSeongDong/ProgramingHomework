@@ -1,13 +1,8 @@
 #include "Taskmanager.h"
 
-#pragma warning(disable:4996);
-
 int main()		//argv[1] : 사전파일명, argv[2] : 사용자파일명
 {
 	IoHandler ioh;
-
-	WordList wordList;
-	UserList userList;
 
 	Taskmanager tm;
 	HangmanGame hg;
@@ -40,16 +35,16 @@ int main()		//argv[1] : 사전파일명, argv[2] : 사용자파일명
 		return 0;
 	}
 
-	char buf[255] = { 0 };
+	char buf[255];
 	ioh.putMsg("행맨 서버에 접속중...");
 
-	tm.loadUser(userList, servSock);
+	ioh.printUserMenu(servSock);
 
 	while (true)
 	{
-		ioh.printMenuHeader(tm.getCurrentUser());
+		ioh.printMenuHeader(tm.getCurrentUser(), tm.getCurrentWin(), tm.getCurrentLose());
 
-		menu = tm.selectMenu(ioh.inputMenu(tm.getCurrentUser()), hg, userList, wordList);
+		menu = tm.selectMenu(ioh.inputMenu(tm.getCurrentUser()), hg, servSock);
 
 		if (menu == 'Q' || menu == 'Z')
 		{

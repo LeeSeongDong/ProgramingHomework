@@ -1,8 +1,7 @@
 #ifndef __IOHANDLER_H__
 #define __IOHANDLER_H__
 
-#include "UserList.h"
-#include "WordList.h"
+#include "User.h"
 
 class IoHandler
 {
@@ -17,15 +16,15 @@ public :
 	void printHangman(int count);
 	void printLetter(char a);
 
-	User printUserMenu(UserList &userList, SOCKET& servSock);
+	User printUserMenu(SOCKET& servSock);
 
 	
-	void printRank(UserList &userList);
-	void printPreviousRecord(UserList &userList, User currentUser);
-	void printCurrentRecord(User currentUser);
+	void printRank(SOCKET& servSock);
+	void printPreviousRecord(User& currentUser);
+	void printCurrentRecord(int win, int lose);
 
-	void printGameHeader(User currentUser);
-	void printMenuHeader(User currentUser);
+	void printGameHeader(User& currentUser, int win, int lose);
+	void printMenuHeader(User& currentUser, int win, int lose);
 
 	void putMsg(string msg)
 	{

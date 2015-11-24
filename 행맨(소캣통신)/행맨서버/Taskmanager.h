@@ -15,6 +15,7 @@ public :
 	void sendUserInfo(UserList& userList, SOCKET& clntSock);
 	void sendRankInfo(UserList& userList, SOCKET& clntSock);
 	void sendGameInfo(WordList& wordList, SOCKET& clntSock);
+	void saveAndQuit(UserList& userList, SOCKET& clntSock);
 
 };
 

@@ -36,8 +36,8 @@ public :
 	void sortByWinningRate();
 
 	bool isUserExist(string userName);
-	void insertUser(User user);
-	void saveUser(User user);
+	void insertUser(User& user);
+	void updateUser(User& user);
 
 };
 

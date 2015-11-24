@@ -11,7 +11,6 @@ User UserList::getUserByName(string name)
 	}
 }
 
-
 void UserList::setUserWinningRate()
 {
 	for (int i = 0; i < size; ++i)
@@ -72,8 +71,7 @@ void UserList::sortByWinningRate()
 	*/
 }
 
-
-void UserList::insertUser(User user)
+void UserList::insertUser(User& user)
 {
 	if (capacity == size)
 	{
@@ -84,18 +82,18 @@ void UserList::insertUser(User user)
 	userList[size - 1] = user;
 }
 
-void UserList::saveUser(User user)
+void UserList::updateUser(User& user)
 {
 	for (int i = 0; i < size; ++i)
 	{
 		if (userList[i].getName() == user.getName())
 		{
-			userList[i].saveRecord(user.getWinCount(), user.getLoseCount());
+			userList[i] = user;
+
+			break;
 		}
 	}
 }
-
-
 
 bool UserList::isUserExist(string userName)
 {
@@ -109,7 +107,6 @@ bool UserList::isUserExist(string userName)
 	
 	return false;
 }
-
 
 void UserList::doubleCapacity()
 {
