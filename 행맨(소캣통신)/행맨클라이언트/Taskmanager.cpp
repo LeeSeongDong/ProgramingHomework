@@ -286,4 +286,5 @@ void Taskmanager::saveAndQuit(SOCKET& servSock)
 	send(servSock, buf, sizeof(buf), 0);
 
 	cin >> a;
+	cout << a;
 }

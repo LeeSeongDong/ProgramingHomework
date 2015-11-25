@@ -59,7 +59,7 @@ void Taskmanager::startServer(SOCKET& sock, UserList &userList, WordList &wordLi
 		}
 	}
 
-	userList.getUserByName(userName).logout();
+	userList.logout(userName);
 }
 
 string Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
@@ -92,19 +92,19 @@ string Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 
 		if (buf[0] == 'L')
 		{
-			if (userList.getUserByName(userName).isLogin())
+			if (!userList.getUserByName(userName).isLogin())
+			{
+				send(clntSock, "T", 1, 0);
+			}
+			else
 			{
 				send(clntSock, "N", 1, 0);
 				continue;
 			}
-			else
-			{
-				send(clntSock, "T", 1, 0);
-			}
 
 			recv(clntSock, buf, sizeof(buf), 0);
 
-			userList.getUserByName(userName).login();
+			userList.login(userName);
 
 			User user = userList.getUserByName(userName);
 			send(clntSock, user.getName().c_str(), user.getName().size(), 0);
@@ -210,7 +210,6 @@ void Taskmanager::saveAndQuit(UserList& userList, SOCKET& clntSock)
 	lose = atoi(buf);
 	send(clntSock, "next", 4, 0);
 
-	User user(name, win, lose);
-
-	userList.updateUser(user);
+	userList.saveRecord(name, win, lose);
+	userList.logout(name);
 }

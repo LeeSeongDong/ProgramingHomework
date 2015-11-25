@@ -11,10 +11,9 @@ private :
 	int winCount;
 	int loseCount;
 	float winningRate;
-
+	bool loginFlag;
 
 public :
-	bool loginFlag;
 	User() {};
 	User(string inputName)
 	{

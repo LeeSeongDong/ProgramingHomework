@@ -24,7 +24,6 @@ int main()
 	//-----------유저정보 최신화--------------
 	//사전, 유저정보 로드
 	ioh.loadWordFile("DICT.txt", wordList);
-	userList.deleteUserList();
 	ioh.loadUserFile("GAME_RECORD.txt", userList);
 
 

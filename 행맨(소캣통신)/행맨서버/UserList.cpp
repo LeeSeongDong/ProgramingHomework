@@ -1,14 +1,22 @@
 #include "UserList.h"
 
-User UserList::getUserByName(string name)
+const int NOT_FOUND = -1;
+
+int UserList::findUserIndex(string name)
 {
 	for (int i = 0; i < size; ++i)
 	{
 		if (userList[i].getName() == name)
 		{
-			return userList[i];
+			return i;
 		}
 	}
+	return NOT_FOUND;
+}
+
+User UserList::getUserByName(string name)
+{
+	return userList[findUserIndex(name)];
 }
 
 void UserList::setUserWinningRate()
@@ -82,27 +90,11 @@ void UserList::insertUser(User& user)
 	userList[size - 1] = user;
 }
 
-void UserList::updateUser(User& user)
-{
-	for (int i = 0; i < size; ++i)
-	{
-		if (userList[i].getName() == user.getName())
-		{
-			userList[i] = user;
-
-			break;
-		}
-	}
-}
-
 bool UserList::isUserExist(string userName)
 {
-	for (int i = 0; i < size; ++i)
+	if (findUserIndex(userName) != NOT_FOUND)
 	{
-		if (userList[i].getName() == userName)
-		{
-			return true;
-		}
+		return true;
 	}
 	
 	return false;
@@ -125,4 +117,19 @@ void UserList::doubleCapacity()
 	delete[] userList;
 
 	userList = temp;
+}
+
+void UserList::login(string name)
+{
+	userList[findUserIndex(name)].login();
+}
+
+void UserList::logout(string name)
+{
+	userList[findUserIndex(name)].logout();
+}
+
+void UserList::saveRecord(string name, int win, int lose)
+{
+	userList[findUserIndex(name)].saveRecord(win, lose);
 }

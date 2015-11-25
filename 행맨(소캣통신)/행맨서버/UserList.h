@@ -12,6 +12,7 @@ private :
 	User *userList;
 
 	void doubleCapacity();
+	int findUserIndex(string name);
 
 public :
 	UserList() 
@@ -27,6 +28,7 @@ public :
 	{
 		return userList[i];
 	}
+
 	int getSize()
 	{
 		return size;
@@ -37,12 +39,12 @@ public :
 
 	bool isUserExist(string userName);
 	void insertUser(User& user);
-	void updateUser(User& user);
-	void deleteUserList()
-	{
-		size = 0;
-	}
 
+	void saveRecord(string name, int win, int lose);
+	void login(string name);
+	void logout(string name);
+
+	
 };
 
 #endif
