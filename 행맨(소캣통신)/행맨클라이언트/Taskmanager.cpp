@@ -6,14 +6,16 @@ void Taskmanager::startHangmanGame(HangmanGame &hg, SOCKET& servSock)
 	char a;
 
 	string word, partOfSpeech, meaning;
+	char wordBuf[20] = { 0 };
+	char posBuf[10] = { 0 };
 	char buf[255] = { 0 };
 
-	recv(servSock, buf, sizeof(buf), 0);
-	word = buf;
+	recv(servSock, wordBuf, sizeof(wordBuf), 0);
+	word = wordBuf;
 	send(servSock, "next", 4, 0);
 
-	recv(servSock, buf, sizeof(buf), 0);
-	partOfSpeech = buf;
+	recv(servSock, posBuf, sizeof(posBuf), 0);
+	partOfSpeech = posBuf;
 	send(servSock, "next", 4, 0);
 
 	recv(servSock, buf, sizeof(buf), 0);
@@ -286,5 +288,4 @@ void Taskmanager::saveAndQuit(SOCKET& servSock)
 	send(servSock, buf, sizeof(buf), 0);
 
 	cin >> a;
-	cout << a;
 }

@@ -226,7 +226,7 @@ void IoHandler::printRank(SOCKET& servSock)
 	string name;
 	int win;
 	int lose;
-	string winningRate;
+	float winningRate;
 
 	recv(servSock, buf, sizeof(buf), 0);
 	int numOfUser = atoi(buf);
@@ -234,15 +234,15 @@ void IoHandler::printRank(SOCKET& servSock)
 
 	for (int i = 0; i < numOfUser; ++i)
 	{
-		send(servSock, "RNK", 4, 0);
+		send(servSock, "RNK", 3, 0);
 
 		recv(servSock, buf, sizeof(buf), 0);
 		rank = atoi(buf);
-		send(servSock, "NAM", 4, 0);
+		send(servSock, "NAM", 3, 0);
 
 		recv(servSock, buf, sizeof(buf), 0);
 		name = buf;
-		send(servSock, "WIN", 4, 0);
+		send(servSock, "WIN", 3, 0);
 
 		recv(servSock, buf, sizeof(buf), 0);
 		win = atoi(buf);
@@ -253,7 +253,7 @@ void IoHandler::printRank(SOCKET& servSock)
 		send(servSock, "WINR", 4, 0);
 
 		recv(servSock, buf, sizeof(buf), 0);
-		winningRate = buf;
+		winningRate = (float)atof(buf);;
 
 		cout << rank << "µî : " << name;
 		cout << "( " << win + lose << "Àü ";

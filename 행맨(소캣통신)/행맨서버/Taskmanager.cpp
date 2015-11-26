@@ -1,10 +1,9 @@
 #include "Taskmanager.h"
 #pragma warning(disable:4996)
 
-void Taskmanager::startServer(SOCKET& sock, UserList &userList, WordList &wordList)
+void Taskmanager::startServer(SOCKET& sock)
 {
-	IoHandler ioh;
-	string userName = sendUserInfo(userList, sock);
+	string userName = sendUserInfo(sock);
 
 	char buf[255] = { 0 };
 
@@ -18,7 +17,7 @@ void Taskmanager::startServer(SOCKET& sock, UserList &userList, WordList &wordLi
 		//게임시작
 		case 'S':
 		{
-			sendGameInfo(wordList, sock);
+			sendGameInfo(sock);
 			break;
 		}
 		//현재승패정보
@@ -34,19 +33,19 @@ void Taskmanager::startServer(SOCKET& sock, UserList &userList, WordList &wordLi
 		//전체유저승패정보
 		case 'R':
 		{
-			sendRankInfo(userList, sock);
+			sendRankInfo(sock);
 			break;
 		}
 		//저장후종료
 		case 'Q':
 		{
-			saveAndQuit(userList, sock);
-			ioh.saveUserFile("GAME_RECORD.txt", userList);
+			saveAndQuit(sock);
 			break;
 		}
 		//바로종료
 		case 'Z':
 		{
+			dbh.userLogout(userName);
 			break;
 		}
 		default:
@@ -58,14 +57,13 @@ void Taskmanager::startServer(SOCKET& sock, UserList &userList, WordList &wordLi
 			break;
 		}
 	}
-
-	userList.logout(userName);
 }
 
-string Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
+string Taskmanager::sendUserInfo(SOCKET& clntSock)
 {
 	char buf[255] = { 0 };
 	string userName;
+	MYSQL_ROW row;
 
 	while (true)
 	{
@@ -73,7 +71,8 @@ string Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 		recv(clntSock, buf, sizeof(buf), 0);
 		userName = buf;
 
-		if (userList.isUserExist(userName))
+		row = dbh.getRowByUserName(userName);
+		if (row)
 		{
 			send(clntSock, "T", 1, 0);
 		}
@@ -81,10 +80,8 @@ string Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 		{
 			send(clntSock, "F", 1, 0);
 
-			User newUser(userName, 0, 0);
-			newUser.login();
-			newUser.setWinningRate();
-			userList.insertUser(newUser);
+			dbh.insertUser(userName);
+			dbh.userLogin(userName);
 			break;
 		}
 
@@ -92,7 +89,7 @@ string Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 
 		if (buf[0] == 'L')
 		{
-			if (!userList.getUserByName(userName).isLogin())
+			if (row[4][0] == 'F')
 			{
 				send(clntSock, "T", 1, 0);
 			}
@@ -104,18 +101,15 @@ string Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 
 			recv(clntSock, buf, sizeof(buf), 0);
 
-			userList.login(userName);
+			dbh.userLogin(userName);
 
-			User user = userList.getUserByName(userName);
-			send(clntSock, user.getName().c_str(), user.getName().size(), 0);
+			send(clntSock, userName.c_str(), userName.size(), 0);
 
 			recv(clntSock, buf, sizeof(buf), 0);
-			itoa(user.getWinCount(), buf, 10);
-			send(clntSock, buf, sizeof(buf), 0);
+			send(clntSock, row[1], sizeof(buf), 0);
 			
 			recv(clntSock, buf, sizeof(buf), 0);
-			itoa(user.getLoseCount(), buf, 10);
-			send(clntSock, buf, sizeof(buf), 0);
+			send(clntSock, row[2], sizeof(buf), 0);
 
 			break;
 		}
@@ -124,13 +118,13 @@ string Taskmanager::sendUserInfo(UserList& userList, SOCKET& clntSock)
 	return userName;
 }
 
-void Taskmanager::sendRankInfo(UserList& userList, SOCKET& clntSock)
+void Taskmanager::sendRankInfo(SOCKET& clntSock)
 {
-	userList.setUserWinningRate();
-	userList.sortByWinningRate();
+	MYSQL_RES* result = dbh.getUsers();
+	MYSQL_ROW* userList = dbh.resToRowArr(result);
 
 	char buf[255] = { 0 };
-	int numOfUser = userList.getSize();
+	int numOfUser = (int)mysql_num_rows(result);
 	itoa(numOfUser, buf, 10);
 
 	send(clntSock, buf, sizeof(buf), 0);
@@ -139,11 +133,9 @@ void Taskmanager::sendRankInfo(UserList& userList, SOCKET& clntSock)
 
 	for (int i = 0; i < numOfUser; ++i)
 	{
-		User user = userList.getUserByIndex(i);
-
 		if (i != 0)
 		{
-			if (userList.getUserByIndex(i - 1).getWinningRate() == userList.getUserByIndex(i).getWinningRate())
+			if (userList[i - 1][3] == userList[i][3])
 			{
 				sameRank += 1;
 			}
@@ -157,44 +149,46 @@ void Taskmanager::sendRankInfo(UserList& userList, SOCKET& clntSock)
 		send(clntSock, buf, sizeof(buf), 0);
 
 		recv(clntSock, buf, sizeof(buf), 0);
-		string name = user.getName();
+		string name = userList[i][0];
 		send(clntSock, name.c_str(), name.size(), 0);
 
 		recv(clntSock, buf, sizeof(buf), 0);
-		itoa(user.getWinCount(), buf, 10);
-		send(clntSock, buf, sizeof(buf), 0);
+		string win = userList[i][1];
+		send(clntSock, win.c_str(), sizeof(win), 0);
 
 		recv(clntSock, buf, sizeof(buf), 0);
-		itoa(user.getLoseCount(), buf, 10);
-		send(clntSock, buf, sizeof(buf), 0);
+		string lose = userList[i][2];
+		send(clntSock, lose.c_str(), sizeof(lose), 0);
 
 		recv(clntSock, buf, sizeof(buf), 0);
-		string winningRate = to_string(user.getWinningRate());
+		string winningRate = userList[i][3];
 		send(clntSock, winningRate.c_str(), winningRate.size(), 0);
 	}
 }
 
-void Taskmanager::sendGameInfo(WordList& wordList, SOCKET& clntSock)
+void Taskmanager::sendGameInfo( SOCKET& clntSock)
 {
-	srand((unsigned int)time(NULL));
-	int numOfWord = wordList.getWordListSize();
-	Word word = wordList.getWordByIndex(rand()%numOfWord);
+	MYSQL_ROW wordRow = dbh.getRandomWord();
 	char buf[255] = { 0 };
+	string word = wordRow[0];
+	string meaning = wordRow[2];
 
-	send(clntSock, word.getWordName().c_str(), word.getWordName().size(), 0);
+	send(clntSock, word.c_str(), word.size(), 0);
 	recv(clntSock, buf, sizeof(buf), 0);
 
-	send(clntSock, word.getPartOfSpeech().c_str(), word.getPartOfSpeech().size(), 0);
+	string partOfSpeech = wordRow[1];
+	partOfSpeech = "[" + partOfSpeech + "]";
+
+	send(clntSock, partOfSpeech.c_str(), partOfSpeech.size(), 0);
 	recv(clntSock, buf, sizeof(buf), 0);
 
-	send(clntSock, word.getMeaning().c_str(), word.getMeaning().size(), 0);
+	send(clntSock, meaning.c_str(), meaning.size(), 0);
 }
 
-void Taskmanager::saveAndQuit(UserList& userList, SOCKET& clntSock)
+void Taskmanager::saveAndQuit(SOCKET& clntSock)
 {
 	char buf[255] = { 0 };
-	string name;
-	int win, lose;
+	string name, win, lose;
 
 	send(clntSock, "next", 4, 0);
 
@@ -203,13 +197,13 @@ void Taskmanager::saveAndQuit(UserList& userList, SOCKET& clntSock)
 	send(clntSock, "next", 4, 0);
 
 	recv(clntSock, buf, sizeof(buf), 0);
-	win = atoi(buf);
+	win = buf;
 	send(clntSock, "next", 4, 0);
 
 	recv(clntSock, buf, sizeof(buf), 0);
-	lose = atoi(buf);
+	lose = buf;
 	send(clntSock, "next", 4, 0);
 
-	userList.saveRecord(name, win, lose);
-	userList.logout(name);
+	dbh.updateUser(name, win, lose);
+	dbh.userLogout(name);
 }

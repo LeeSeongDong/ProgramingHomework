@@ -1,15 +1,12 @@
 #include "Taskmanager.h"
 
-WordList wordList;
-UserList userList;
-
 unsigned WINAPI startServ(void* p)
 {
 	SOCKET sock = (SOCKET)p;
 	Taskmanager tm;
 
 	char buf[255] = { 0 };
-	tm.startServer(sock, userList, wordList);
+	tm.startServer(sock);
 
 	//-----------소켓 닫기---------------
 	closesocket(sock);
@@ -19,14 +16,6 @@ unsigned WINAPI startServ(void* p)
 
 int main()
 {
-	IoHandler ioh;
-
-	//-----------유저정보 최신화--------------
-	//사전, 유저정보 로드
-	ioh.loadWordFile("DICT.txt", wordList);
-	ioh.loadUserFile("GAME_RECORD.txt", userList);
-
-
 	//-------소켓 라이브러리 불러오기(?)--------
 	WSADATA wsaData;
 	int retval = WSAStartup(MAKEWORD(2, 2), &wsaData);
