@@ -1,21 +1,5 @@
 #include "HangmanGame.h"
 
-const int UPPER_A = 65;
-const int GAP_UPPER_TO_LOWER = 32;
-const int NUMBER_OF_ALPHABET = 26;
-const int MAX_HANGMAN_COUNT = 7;
-
-void HangmanGame::makeQuestion(WordList &wordList)
-{
-	srand( (unsigned) time(NULL) );
-	int i = rand() % wordList.getWordListSize();
-
-	questionWord = wordList.getWordByIndex(i).getWordName();
-	partOfSpeech = wordList.getWordByIndex(i).getPartOfSpeech();
-	meaning = wordList.getWordByIndex(i).getMeaning();
-}
-
-
 void HangmanGame::putQuestion()
 {
 	IoHandler ioh;
@@ -32,7 +16,6 @@ void HangmanGame::putQuestion()
 
 }
 
-
 bool HangmanGame::isLetter()
 {
 	if (data.size() == 1)
@@ -44,7 +27,6 @@ bool HangmanGame::isLetter()
 		return false;
 	}
 }
-
 
 bool HangmanGame::isCorrect()
 {
@@ -106,7 +88,6 @@ bool HangmanGame::isCorrect()
 	}
 }
 
-
 void HangmanGame::setFindLetter()
 {
 	findLetter = questionWord;
@@ -117,7 +98,6 @@ void HangmanGame::setFindLetter()
 	}
 }
 
-
 void HangmanGame::setUsableLetter()
 {
 	for ( int i = 0; i < NUMBER_OF_ALPHABET; ++i)
@@ -125,7 +105,6 @@ void HangmanGame::setUsableLetter()
 		usableLetter[i] = UPPER_A + i;
 	}
 }
-
 
 bool HangmanGame::isWin()
 {
@@ -144,10 +123,6 @@ bool HangmanGame::isWin()
 		if(count == questionWord.size())
 		{
 			return true;
-		}
-		else
-		{
-			return false;
 		}
 	}
 	else
@@ -168,7 +143,6 @@ bool HangmanGame::isLose()
 	}
 }
 
-
 void HangmanGame::putUsableLetter()
 {
 	IoHandler ioh;
@@ -186,7 +160,6 @@ void HangmanGame::putUsableLetter()
 	}
 }
 
-
 void HangmanGame::putFindLetter()
 {
 	IoHandler ioh;
@@ -203,7 +176,6 @@ void HangmanGame::putFindLetter()
 	}
 }
 
-
 void HangmanGame::putHangman()
 {
 	IoHandler ioh;
@@ -211,10 +183,9 @@ void HangmanGame::putHangman()
 	ioh.printHangman(hangmanCount);
 }
 
-
-void HangmanGame::putGameHeader(User currentUser)
+void HangmanGame::putGameHeader(User currentUser, int win, int lose)
 {
 	IoHandler ioh;
 
-	ioh.printGameHeader(currentUser);
+	ioh.printGameHeader(currentUser, win, lose);
 }

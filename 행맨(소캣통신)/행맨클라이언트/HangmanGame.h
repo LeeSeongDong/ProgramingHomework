@@ -18,8 +18,14 @@ private :
 public :
 	HangmanGame() {};
 	~HangmanGame() {};
+
+	void setQuestion(string word, string partOfSpeech, string meaning)
+	{
+		this->questionWord = word;
+		this->partOfSpeech = partOfSpeech;
+		this->meaning = meaning;
+	}
 	
-	void makeQuestion(WordList &wordList);
 	void putQuestion();
 
 	string getQuestionWord()
@@ -52,7 +58,7 @@ public :
 	bool isWin();
 	bool isLose();
 
-	void endGame()
+	void initGame()
 	{
 		hangmanCount = 0;
 	}
@@ -60,7 +66,7 @@ public :
 	void putUsableLetter();
 	void putFindLetter();
 	void putHangman();
-	void putGameHeader(User currentUser);
+	void putGameHeader(User currentUser, int win, int lose);
 };
 
 #endif
