@@ -10,7 +10,6 @@ void DBHandler::connect()
 	}
 	else
 	{
-		cout << "데이터베이스 연결 성공!" << endl;
 		mysql_select_db(&mysql, "hangman");
 	}
 }
@@ -81,7 +80,7 @@ MYSQL_ROW DBHandler::getRowByUserName(string name)
 MYSQL_RES* DBHandler::getUsers()
 {
 	MYSQL_RES *result;
-	mysql_query(&mysql, "select * from user order by winningRate DESC");
+	mysql_query(&mysql, "select * from user order by winningRate DESC, win DESC");
 
 	result = mysql_store_result(&mysql);
 	return result;
@@ -104,6 +103,12 @@ MYSQL_ROW* DBHandler::resToRowArr(MYSQL_RES* res)
 void DBHandler::insertUser(string name)
 {
 	string query = "insert into user (name) values ('" + name + "')";
+	mysql_query(&mysql, query.c_str());
+}
+
+void DBHandler::deleteUser(string name)
+{
+	string query = "delete from user where name='" + name + "'";
 	mysql_query(&mysql, query.c_str());
 }
 

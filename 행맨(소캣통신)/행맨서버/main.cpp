@@ -28,23 +28,23 @@ int main()
 
 	//----------소켓 생성--------------
 	SOCKET servSock;
-	servSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	servSock = socket(PF_INET, SOCK_STREAM, 0);
 	if (servSock == SOCKET_ERROR)
 	{
 		printf("socket() Error\n");
 		return 0;
 	}
 	//-----------------------------------
-
+	
 	//--------서버(자신)의 소켓 정보 입력------------
 	SOCKADDR_IN serv_addr = { 0 };					// 초기화
 	serv_addr.sin_family = AF_INET;					// IP 사용
-	serv_addr.sin_port = htons(4000);				// 포트 4000번
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);	// 주소는 알아서 찾기
+	serv_addr.sin_port = htons(1111);				// 포트 1111번
 	//------------------------------------------------
 
 	//-----------인터넷에 연결---------------------
-	retval = ::bind(servSock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR));
+	retval = ::bind(servSock, (SOCKADDR*)&serv_addr, sizeof(serv_addr));
 	if (retval == SOCKET_ERROR)
 	{
 		printf("bind() Error\n");
@@ -53,10 +53,10 @@ int main()
 	//--------------------------------------------
 
 	//-----------대기인원 설정-----------------
-	listen(servSock, 5);		// 5명까지만 대기할 수 있게 함...
+	listen(servSock, 5);		// 5명까지 대기
 	//-------------------------------------------
-	SOCKADDR_IN clnt_addr = { 0 };
-	int size = sizeof(SOCKADDR_IN);
+	SOCKADDR_IN clnt_addr;// = { 0 };
+	int size = sizeof(clnt_addr);
 
 	cout << "서버가동" << endl;
 
@@ -71,7 +71,7 @@ int main()
 			continue;
 		}
 
-		cout << "클라이언트 접속\n" << endl;
+		cout << "클라이언트 접속\n";
 
 		//-----------수신 스레드 생성-------------
 		_beginthreadex(NULL, 0, startServ, (void*)sock, 0, NULL);

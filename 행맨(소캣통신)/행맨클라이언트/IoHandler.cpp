@@ -117,8 +117,8 @@ User IoHandler::printUserMenu(SOCKET& servSock)
 {
 	User currentUser;
 	string userName;
-
 	char a;
+
 
 	while (true){
 		system("cls");
@@ -130,8 +130,16 @@ User IoHandler::printUserMenu(SOCKET& servSock)
 		cout << "(기록해 둔 게임 성적을 load되거나 새로운 사용자가 등록됩니다.)" << endl;
 		cout << "사용자의 이름을 입력하세요 : ";
 
-		while (std::cin.get() != '\n');	//입력버퍼 지우기
-		getline(cin, userName);
+		while (true)
+		{
+			while (std::cin.get() != '\n');	//입력버퍼 지우기
+			getline(cin, userName);
+
+			if (userName != "")
+			{
+				break;
+			}
+		}
 
 		char buf[255] = { 0 };
 		send(servSock, userName.c_str(), userName.size(), 0);	//유저정보요청
@@ -145,7 +153,7 @@ User IoHandler::printUserMenu(SOCKET& servSock)
 			cout << "새로운 사용자 이름을 등록하려면 N을 입력하세요 [L/N] : ";
 			cin >> a;
 
-			cout << endl << endl;
+			cout << endl ;
 
 			if (a == 'L' || a == 'l')
 			{
@@ -157,7 +165,7 @@ User IoHandler::printUserMenu(SOCKET& servSock)
 				{
 					cout << "이미 게임중인 사용자입니다." << endl;
 
-					cin >> a;
+					system("pause");
 					continue;
 				}
 				else
@@ -181,8 +189,8 @@ User IoHandler::printUserMenu(SOCKET& servSock)
 				User user(name, win, lose);
 				currentUser = user;
 
-				cout << "기존 사용자 [" << userName << "]을/를 불러옵니다. ";
-				cin >> a;
+				cout << "기존 사용자 [" << userName << "]을/를 불러옵니다. " << endl;
+				system("pause");
 				break;
 			}
 
@@ -196,7 +204,7 @@ User IoHandler::printUserMenu(SOCKET& servSock)
 			{
 				send(servSock, "a", 1, 0);
 				cout << "L 또는 N을 입력하세요." << endl;
-				cin >> a;
+				system("pause");
 				continue;
 			}
 		}
@@ -208,7 +216,7 @@ User IoHandler::printUserMenu(SOCKET& servSock)
 
 			cout << "새로운 사용자 [" << userName << "]을/를 불러옵니다. ";
 
-			cin >> a;
+			system("pause");
 
 			break;
 		}
@@ -219,50 +227,66 @@ User IoHandler::printUserMenu(SOCKET& servSock)
 
 void IoHandler::printRank(SOCKET& servSock)
 {
-	char a;
 	char buf[255] = { 0 };
-
-	int rank;
-	string name;
-	int win;
-	int lose;
-	float winningRate;
 
 	recv(servSock, buf, sizeof(buf), 0);
 	int numOfUser = atoi(buf);
-	
 
 	for (int i = 0; i < numOfUser; ++i)
 	{
-		send(servSock, "RNK", 3, 0);
+		string rank;
+		string name;
+		string win;
+		string lose;
+		string winningRate;
+
+		send(servSock, "next", 4, 0);
 
 		recv(servSock, buf, sizeof(buf), 0);
-		rank = atoi(buf);
-		send(servSock, "NAM", 3, 0);
+		string msg = buf;
+		int msgSize = msg.size();
+		int j = 0;
 
-		recv(servSock, buf, sizeof(buf), 0);
-		name = buf;
-		send(servSock, "WIN", 3, 0);
+		for (; msg.at(j) != '#'; ++j)
+		{
+			rank += msg.at(j);
+		}
+		++j;
 
-		recv(servSock, buf, sizeof(buf), 0);
-		win = atoi(buf);
-		send(servSock, "LOSE", 4, 0);
+		for (; msg.at(j) != '#'; ++j)
+		{
+			name += msg.at(j);
+		}
+		++j;
 
-		recv(servSock, buf, sizeof(buf), 0);
-		lose = atoi(buf);
-		send(servSock, "WINR", 4, 0);
+		for (; msg.at(j) != '#'; ++j)
+		{
+			win += msg.at(j);
+		}
+		++j;
 
-		recv(servSock, buf, sizeof(buf), 0);
-		winningRate = (float)atof(buf);;
+		for (; msg.at(j) != '#'; ++j)
+		{
+			lose += msg.at(j);
+		}
+		++j;
+
+		for (; msg.at(j) != '@'; ++j)
+		{
+			winningRate += msg.at(j);
+		}
+
+		int winCount = atoi(win.c_str());
+		int loseCount = atoi(lose.c_str());
 
 		cout << rank << "등 : " << name;
-		cout << "( " << win + lose << "전 ";
+		cout << "( " << winCount+loseCount << "전 ";
 		cout << win << "승. ";
 		cout << "승률 " << winningRate << "% )";
 		cout << endl << endl;
 	}
 
-	cin >> a;
+	system("pause");
 }
 
 void IoHandler::printPreviousRecord(User& currentUser)
@@ -280,8 +304,7 @@ void IoHandler::printPreviousRecord(User& currentUser)
 		cout << "이전 기록이 없습니다." << endl;
 	}
 
-	char a;
-	cin >> a;
+	system("pause");
 }
 
 void IoHandler::printCurrentRecord(int win, int lose)
@@ -291,8 +314,7 @@ void IoHandler::printCurrentRecord(int win, int lose)
 	cout << win << "승 ";
 	cout << lose << "패입니다." << endl;
 
-	char a;
-	cin >> a;
+	system("pause");
 }
 
 void IoHandler::printGameHeader(User& currentUser, int win, int lose)

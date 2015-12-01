@@ -24,6 +24,7 @@ public :
 	MYSQL_ROW* resToRowArr(MYSQL_RES* res);
 
 	void insertUser(string name);
+	void deleteUser(string name);
 	void updateUser(string name, string win, string lose);
 	void userLogin(string name);
 	void userLogout(string name);

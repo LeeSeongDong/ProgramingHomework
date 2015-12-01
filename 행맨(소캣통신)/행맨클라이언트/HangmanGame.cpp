@@ -13,7 +13,21 @@ void HangmanGame::putQuestion()
 	ioh.putSpace();
 	ioh.putMsg(meaning);
 	ioh.putNewLine();
+}
 
+void HangmanGame::putAnswer()
+{
+	IoHandler ioh;
+
+	ioh.putMsg("대상 단어: ");
+	ioh.putMsg(questionWord);
+	ioh.putNewLine();
+
+	ioh.putMsg("힌트: ");
+	ioh.putMsg(partOfSpeech);
+	ioh.putSpace();
+	ioh.putMsg(meaning);
+	ioh.putNewLine();
 }
 
 bool HangmanGame::isLetter()
@@ -38,7 +52,7 @@ bool HangmanGame::isCorrect()
 
 			for (int i = 0; i < NUMBER_OF_ALPHABET; ++i)
 			{
-				for (int j = 0; j < findLetter.size(); ++j)
+				for (int j = 0; j < (signed)findLetter.size(); ++j)
 				{
 					if (usableLetter[i] != '_' && usableLetter[i] == findLetter.at(j))
 					{
@@ -58,7 +72,7 @@ bool HangmanGame::isCorrect()
 	{
 		int count = 0;
 
-		for (int i = 0; i < questionWord.size(); ++i)
+		for (int i = 0; i < (signed)questionWord.size(); ++i)
 		{
 			if (data.at(0) == questionWord.at(i))
 			{
@@ -92,7 +106,7 @@ void HangmanGame::setFindLetter()
 {
 	findLetter = questionWord;
 
-	for (int i = 0; i < questionWord.size(); ++i)
+	for (int i = 0; i < (signed)questionWord.size(); ++i)
 	{
 		findLetter.at(i) = '_';
 	}
@@ -112,7 +126,7 @@ bool HangmanGame::isWin()
 	{
 		int count = 0;
 
-		for (int i = 0; i < questionWord.size(); ++i)
+		for (int i = 0; i < (signed)questionWord.size(); ++i)
 		{
 			if(findLetter.at(i) != '_')
 			{
@@ -123,6 +137,10 @@ bool HangmanGame::isWin()
 		if(count == questionWord.size())
 		{
 			return true;
+		}
+		else
+		{
+			return false;
 		}
 	}
 	else
@@ -164,11 +182,11 @@ void HangmanGame::putFindLetter()
 {
 	IoHandler ioh;
 
-	for (int i = 0; i < questionWord.size(); ++i)
+	for (int i = 0; i < (signed)questionWord.size(); ++i)
 	{
 		ioh.printLetter(findLetter[i]);
 
-		if (i < questionWord.size() - 1);
+		if (i < (signed)questionWord.size() - 1)
 		{
 			ioh.putSpace();
 		}

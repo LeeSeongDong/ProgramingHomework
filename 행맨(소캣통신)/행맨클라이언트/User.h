@@ -46,7 +46,6 @@ public :
 		return winningRate;
 	}
 
-	void setWinningRate();
 	void saveRecord(int currentWinCount, int currentLoseCount)
 	{
 		winCount += currentWinCount;

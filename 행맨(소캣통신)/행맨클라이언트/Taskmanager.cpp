@@ -3,7 +3,6 @@
 void Taskmanager::startHangmanGame(HangmanGame &hg, SOCKET& servSock)
 {
 	IoHandler ioh;
-	char a;
 
 	string word, partOfSpeech, meaning;
 	char wordBuf[20] = { 0 };
@@ -49,7 +48,7 @@ void Taskmanager::startHangmanGame(HangmanGame &hg, SOCKET& servSock)
 
 		if (isOverlap(hg))
 		{
-			cin >> a;
+			system("pause");
 			continue;
 		}
 
@@ -67,8 +66,9 @@ void Taskmanager::startHangmanGame(HangmanGame &hg, SOCKET& servSock)
 				ioh.putNewLine();
 				ioh.putNewLine();
 
-				ioh.putMsg("단어찾기에 성공하셨습니다!! 계속하시려면 아무 키나 입력하세요.");
-				cin >> a;
+				ioh.putMsg("단어찾기에 성공하셨습니다!! ");
+				ioh.putNewLine();
+				system("pause");
 
 				currentUserScore(true);
 				break;
@@ -80,15 +80,15 @@ void Taskmanager::startHangmanGame(HangmanGame &hg, SOCKET& servSock)
 			{
 				hg.putGameHeader(currentUser, win, lose);
 				hg.putHangman();
-				hg.putQuestion();
+				hg.putAnswer();
 
 				hg.putUsableLetter();
 
 				ioh.putNewLine();
 				ioh.putNewLine();
 
-				ioh.putMsg("단어찾기에 실패하셨습니다!! 계속하시려면 아무 키나 입력하세요. ");
-				cin >> a;
+				ioh.putMsg("단어찾기에 실패하셨습니다!! ");
+				system("pause");
 
 				currentUserScore(false);
 				break;
@@ -143,6 +143,8 @@ char Taskmanager::selectMenu(char a, HangmanGame &hg, SOCKET& servSock)
 	case 'Z':
 	{//저장하지않고 종료
 		send(servSock, "Z", 1, 0);
+		ioh.putMsg("현재 기록을 저장하지 않고 바로 종료합니다.");
+		ioh.putNewLine();
 		break;
 	}
 
@@ -165,7 +167,7 @@ void Taskmanager::loadUser(SOCKET& servSock)
 
 string Taskmanager::upperToLower(string word)
 {
-	for (int i = 0; i < word.size(); ++i)
+	for (int i = 0; i < (signed)word.size(); ++i)
 	{
 		if (word.at(i) < LOWER_A)
 		{
@@ -194,7 +196,8 @@ bool Taskmanager::isOverlap(HangmanGame hg)
 
 		if (count == 0)
 		{
-			ioh.putMsg("사용 가능한 낱말중에서 골라 입력하세요. ");
+			ioh.putMsg("사용 가능한 문자중에서 골라 입력하세요. ");
+			ioh.putNewLine();
 			return true;
 		}
 		else
@@ -211,6 +214,7 @@ bool Taskmanager::isOverlap(HangmanGame hg)
 		else
 		{
 			ioh.putMsg("단어의 글자수가 다릅니다.");
+			ioh.putNewLine();
 			return true;
 		}
 	}
@@ -252,7 +256,6 @@ void Taskmanager::putCurrentRecord()
 void Taskmanager::saveAndQuit(SOCKET& servSock)
 {
 	IoHandler ioh;
-	char a;
 	char buf[255] = { 0 };
 
 	cout << endl;
@@ -286,6 +289,4 @@ void Taskmanager::saveAndQuit(SOCKET& servSock)
 
 	itoa(currentUser.getLoseCount(), buf, 10);
 	send(servSock, buf, sizeof(buf), 0);
-
-	cin >> a;
 }

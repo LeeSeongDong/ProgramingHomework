@@ -5,6 +5,8 @@ void Taskmanager::startServer(SOCKET& sock)
 {
 	string userName = sendUserInfo(sock);
 
+	cout << userName << "-- 접속" << endl;
+
 	char buf[255] = { 0 };
 
 	while (true)
@@ -17,6 +19,7 @@ void Taskmanager::startServer(SOCKET& sock)
 		//게임시작
 		case 'S':
 		{
+			cout << userName << "-- 단어정보 요청" << endl;
 			sendGameInfo(sock);
 			break;
 		}
@@ -33,19 +36,21 @@ void Taskmanager::startServer(SOCKET& sock)
 		//전체유저승패정보
 		case 'R':
 		{
+			cout << userName << "-- 랭킹정보 요청" << endl;
 			sendRankInfo(sock);
 			break;
 		}
 		//저장후종료
 		case 'Q':
 		{
+			cout << userName << "-- 기록저장 요청" << endl;
 			saveAndQuit(sock);
 			break;
 		}
 		//바로종료
 		case 'Z':
 		{
-			dbh.userLogout(userName);
+			unsaveAndQuit(userName);
 			break;
 		}
 		default:
@@ -54,6 +59,7 @@ void Taskmanager::startServer(SOCKET& sock)
 
 		if (menu == 'Q' || menu == 'Z')
 		{
+			cout << userName << "-- 종료" << endl;
 			break;
 		}
 	}
@@ -103,7 +109,7 @@ string Taskmanager::sendUserInfo(SOCKET& clntSock)
 
 			dbh.userLogin(userName);
 
-			send(clntSock, userName.c_str(), userName.size(), 0);
+			send(clntSock, userName.c_str(), (int)userName.size(), 0);
 
 			recv(clntSock, buf, sizeof(buf), 0);
 			send(clntSock, row[1], sizeof(buf), 0);
@@ -135,7 +141,10 @@ void Taskmanager::sendRankInfo(SOCKET& clntSock)
 	{
 		if (i != 0)
 		{
-			if (userList[i - 1][3] == userList[i][3])
+			float f1 = (float)atof(userList[i - 1][3]);
+			float f2 = (float)atof(userList[i][3]);
+
+			if (f1 == f2)
 			{
 				sameRank += 1;
 			}
@@ -145,24 +154,14 @@ void Taskmanager::sendRankInfo(SOCKET& clntSock)
 			}
 		}
 		recv(clntSock, buf, sizeof(buf), 0);
-		itoa(i + 1 - sameRank, buf, 10);
-		send(clntSock, buf, sizeof(buf), 0);
 
-		recv(clntSock, buf, sizeof(buf), 0);
-		string name = userList[i][0];
-		send(clntSock, name.c_str(), name.size(), 0);
+		string msg;
+		char intBuf[5] = { 0 };
+		itoa(i - sameRank + 1, intBuf, 10);
+		msg = intBuf;
+		msg = msg + "#" + userList[i][0] + "#" + userList[i][1] + "#" + userList[i][2] + "#" + userList[i][3] + "@";
 
-		recv(clntSock, buf, sizeof(buf), 0);
-		string win = userList[i][1];
-		send(clntSock, win.c_str(), sizeof(win), 0);
-
-		recv(clntSock, buf, sizeof(buf), 0);
-		string lose = userList[i][2];
-		send(clntSock, lose.c_str(), sizeof(lose), 0);
-
-		recv(clntSock, buf, sizeof(buf), 0);
-		string winningRate = userList[i][3];
-		send(clntSock, winningRate.c_str(), winningRate.size(), 0);
+		send(clntSock, msg.c_str(), (int)msg.size(), 0);
 	}
 }
 
@@ -173,16 +172,16 @@ void Taskmanager::sendGameInfo( SOCKET& clntSock)
 	string word = wordRow[0];
 	string meaning = wordRow[2];
 
-	send(clntSock, word.c_str(), word.size(), 0);
+	send(clntSock, word.c_str(), (int)word.size(), 0);
 	recv(clntSock, buf, sizeof(buf), 0);
 
 	string partOfSpeech = wordRow[1];
 	partOfSpeech = "[" + partOfSpeech + "]";
 
-	send(clntSock, partOfSpeech.c_str(), partOfSpeech.size(), 0);
+	send(clntSock, partOfSpeech.c_str(), (int)partOfSpeech.size(), 0);
 	recv(clntSock, buf, sizeof(buf), 0);
 
-	send(clntSock, meaning.c_str(), meaning.size(), 0);
+	send(clntSock, meaning.c_str(), (int)meaning.size(), 0);
 }
 
 void Taskmanager::saveAndQuit(SOCKET& clntSock)
@@ -206,4 +205,20 @@ void Taskmanager::saveAndQuit(SOCKET& clntSock)
 
 	dbh.updateUser(name, win, lose);
 	dbh.userLogout(name);
+}
+
+void Taskmanager::unsaveAndQuit(string userName)
+{
+	MYSQL_ROW row = dbh.getRowByUserName(userName);
+	int winCnt = atoi(row[1]);
+	int loseCnt = atoi(row[2]);
+
+	if (winCnt == 0 && winCnt == 0)
+	{
+		dbh.deleteUser(userName);
+	}
+	else
+	{
+		dbh.userLogout(userName);
+	}
 }

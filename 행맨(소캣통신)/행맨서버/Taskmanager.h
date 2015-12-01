@@ -17,6 +17,7 @@ public :
 	void sendRankInfo(SOCKET& clntSock);
 	void sendGameInfo(SOCKET& clntSock);
 	void saveAndQuit(SOCKET& clntSock);
+	void unsaveAndQuit(string userName);
 
 };
 

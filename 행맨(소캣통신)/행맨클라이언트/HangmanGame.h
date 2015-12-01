@@ -6,7 +6,7 @@
 class HangmanGame
 {
 private :
-	int hangmanCount = 0;
+	int hangmanCount;
 	string questionWord;
 	string partOfSpeech;
 	string meaning;
@@ -16,7 +16,10 @@ private :
 	string findLetter;
 
 public :
-	HangmanGame() {};
+	HangmanGame()
+	{
+		hangmanCount = 0;
+	};
 	~HangmanGame() {};
 
 	void setQuestion(string word, string partOfSpeech, string meaning)
@@ -27,6 +30,7 @@ public :
 	}
 	
 	void putQuestion();
+	void putAnswer();
 
 	string getQuestionWord()
 	{
